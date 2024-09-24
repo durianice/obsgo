@@ -73,5 +73,18 @@ func main() {
 
 	if err != nil {
 		os.Exit(1)
+	} else {
+		token := os.Getenv("TELEGRAM_BOT_TOKEN")
+		chatIDStr := os.Getenv("TELEGRAM_CHAT_ID")
+		if token != "" && chatIDStr != "" {
+			if *operation == "put" {
+				message := fmt.Sprintf("[OBSGO]已备份 存储桶:%s - 路径:%s - 源文件:%s", *bucket, *key, *sourceFile)
+				SendMsg(token, chatIDStr, message)
+			}
+			if *operation == "del" {
+				message := fmt.Sprintf("[OBSGO]已删除 存储桶:%s - 路径:%s", *bucket, *key)
+				SendMsg(token, chatIDStr, message)
+			}
+		}
 	}
 }
