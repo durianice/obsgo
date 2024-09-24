@@ -13,6 +13,8 @@ AccessKeyID=ASDFGH12345 SecretAccessKey=Nhbn7sDKJBfsfjsnbsd77Dfsjn endPoint="htt
 
 ## development
 ```bash
+# TELEGRAM_BOT_TOKEN=1234:ABCD \
+# TELEGRAM_CHAT_ID=111222333 \
 AccessKeyID=ASDFGH12345 \
 SecretAccessKey=Nhbn7sDKJBfsfjsnbsd77Dfsjn \
 endPoint="https://obs.ap-xxx.myhuaweicloud.com" \
