@@ -1,19 +1,31 @@
 name: Build and Publish
+
 on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Semantic version (e.g., 1.2.3)'
+        required: true
+        type: string
 
 permissions:
   contents: write
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
+
+    # 自动生成带 v 前缀的版本标签
+    - name: Generate version tag
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      run: |
+        echo "TAG_NAME=v${{ github.event.inputs.version }}" >> $GITHUB_ENV
 
     - name: Setup Go
       uses: actions/setup-go@v4
@@ -23,19 +35,43 @@ jobs:
     - name: Build
       run: bash build.sh
 
-    - name: Create Release and Upload Release Asset
+    # 动态确定标签名称
+    - name: Determine tag
+      id: tag
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "tag_name=${{ env.TAG_NAME }}" >> $GITHUB_OUTPUT
+        else
+          echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        fi
+
+    # 创建主版本发布
+    - name: Create Versioned Release
       uses: softprops/action-gh-release@v1
       with:
+        tag_name: ${{ steps.tag.outputs.tag_name }}
+        name: ${{ steps.tag.outputs.tag_name }}
         draft: false
         prerelease: false
         files: |
           build/*
-    - name: Publish as tag 'latest'
+
+    # 更新 latest 标签
+    - name: Update Latest Tag
+      run: |
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+        git tag -f latest
+        git push origin latest --force
+
+    # 创建/更新 latest 发布
+    - name: Create Latest Release
       uses: softprops/action-gh-release@v1
       with:
-        name: 'latest'
-        tag_name: 'latest'
+        tag_name: latest
+        name: "Latest Release"
         draft: false
         prerelease: false
         files: |
           build/*
+        replace_existing: true
