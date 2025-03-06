@@ -79,7 +79,7 @@ func main() {
 		if token != "" && chatIDStr != "" {
 			if *operation == "put" {
 				size := "-1"
-				tempSize, err := getFileSize(*sourceFile)
+				tempSize, err := GetFileSize(*sourceFile)
 				if err == nil {
 					size = tempSize
 				}
